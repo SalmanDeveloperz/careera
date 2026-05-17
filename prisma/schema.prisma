@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  STUDENT
+  GRADUATE
+  PROFESSIONAL
+  ADMIN
+}
+
+enum OpportunityType {
+  INTERNSHIP
+  JOB
+  SCHOLARSHIP
+  COMPETITION
+  OPEN_SOURCE
+  FELLOWSHIP
+  HACKATHON
+  EVENT
+  CERTIFICATION
+  MENTORSHIP
+}
+
+enum OpportunityStatus {
+  ACTIVE
+  UPCOMING
+  CLOSED
+  UNKNOWN
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?
+  name         String?
+  role         UserRole @default(STUDENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile       Profile?
+  assessments   Assessment[]
+  notifications Notification[]
+  progress      Progress[]
+  mentorships   Mentorship[] @relation("Mentee")
+}
+
+model Profile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline        String?
+  bio             String?
+  university      String?
+  degree          String?
+  fieldOfStudy    String?
+  graduationYear  Int?
+  currentYear     Int?
+  country         String?
+  city            String?
+  skills          String   @default("[]")
+  interests       String   @default("[]")
+  targetRoles     String   @default("[]")
+  experienceLevel String?
+  githubUrl       String?
+  linkedinUrl     String?
+  portfolioUrl    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Assessment {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  scores      String   @default("{}")
+  insights    String?
+  completedAt DateTime @default(now())
+}
+
+model Skill {
+  id          String @id @default(cuid())
+  name        String @unique
+  category    String
+  description String?
+}
+
+model CareerPath {
+  id              String  @id @default(cuid())
+  title           String
+  slug            String  @unique
+  description     String
+  domain          String
+  requiredSkills  String  @default("[]")
+  salaryRange     String?
+  timelineMonths  Int?
+  difficulty      DifficultyLevel @default(INTERMEDIATE)
+}
+
+model LearningResource {
+  id          String  @id @default(cuid())
+  title       String
+  url         String
+  provider    String?
+  type        String
+  difficulty  DifficultyLevel @default(BEGINNER)
+  duration    String?
+  isFree      Boolean @default(true)
+  tags        String  @default("[]")
+}
+
+model LearningRoadmap {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  careerPathId String?
+  resourceIds String @default("[]")
+  milestones  String @default("[]")
+}
+
+model OpportunitySource {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  type        String
+  feedUrl     String?
+  apiUrl      String?
+  websiteUrl  String?
+  isActive    Boolean  @default(true)
+  lastSyncedAt DateTime?
+  opportunities Opportunity[]
+}
+
+model Opportunity {
+  id              String            @id @default(cuid())
+  sourceId        String?
+  source          OpportunitySource? @relation(fields: [sourceId], references: [id])
+  externalId      String?
+  title           String
+  slug            String            @unique
+  description     String
+  type            OpportunityType
+  status          OpportunityStatus @default(ACTIVE)
+  organization    String?
+  location        String?
+  isRemote        Boolean           @default(false)
+  url             String
+  applyUrl        String?
+  domains         String            @default("[]")
+  tags            String            @default("[]")
+  skillsRequired  String            @default("[]")
+  eligibility     String?
+  stipend         String?
+  deadline        DateTime?
+  startsAt        DateTime?
+  publishedAt     DateTime?
+  discoveredAt    DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  relevanceScore  Float             @default(0)
+  isCurated       Boolean           @default(false)
+  isFeatured      Boolean           @default(false)
+  pakistanEligible Boolean          @default(false)
+  isGlobal        Boolean           @default(true)
+  eligibleRegions String            @default("[]")
+
+  @@unique([sourceId, externalId])
+  @@index([type, status])
+  @@index([deadline])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  type      String
+  read      Boolean  @default(false)
+  metadata  String   @default("{}")
+  createdAt DateTime @default(now())
+}
+
+model Progress {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model Mentorship {
+  id        String   @id @default(cuid())
+  mentorName String
+  mentorEmail String?
+  menteeId  String
+  mentee    User     @relation("Mentee", fields: [menteeId], references: [id], onDelete: Cascade)
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
