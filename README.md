@@ -1,4 +1,4 @@
-# Careera
+# Careera 🧑🏻‍💻
 
 **A GenAI-intelligent career guidance platform** — surfacing real-time opportunities (GSoC, LFX, ICPC, open source, hackathons, internships) that most students never hear about.
 
