@@ -114,11 +114,42 @@ SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
 
 # Web scraping and data aggregation
 FIRECRAWL_API_KEY="your-firecrawl-key"
+
+# AI-powered features (Career Advisor)
+# Free tier: 15 requests/minute, 1M tokens/day
+# Perfect for development and testing
+# Get your free API key from: https://makersuite.google.com/app/apikey
+GOOGLE_API_KEY="your-free-google-api-key"
 ```
+
+### Setting up AI Features (Career Advisor)
+
+The career advisor and AI-powered features require a **free Google Generative AI API key**:
+
+1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Click **"Get API Key"** and create a new key
+3. Copy the API key
+4. Add it to your `.env` file as `GOOGLE_API_KEY="your-key-here"`
+5. Restart the dev server: `npm run dev`
+
+**Free tier limits:**
+- 15 requests per minute
+- 1 million tokens per day
+- Perfect for development, testing, and moderate usage
+- No credit card required (though Google may request one for verification)
+
+**Switching to a different AI provider:**
+
+The AI module (`src/lib/ai.server.ts`) is designed to be provider-agnostic. To switch to OpenAI, Anthropic, or another provider:
+
+1. Install the provider's SDK
+2. Update `src/lib/ai.server.ts` with the new provider's API calls
+3. Update the `.env` file with the new API key
 
 ### Notes
 
 - The application **runs fully without any environment variables configured**. The UI and interactive features (roadmaps, code playground, opportunities list, resources) work perfectly out of the box.
+- **AI features specifically** require the `GOOGLE_API_KEY`. Without it, you'll see an error when trying to use the Career Advisor feature, but other features remain fully functional.
 - Environment variables prefixed with `VITE_` are embedded in the client-side bundle at build time; only include public values.
 - Server-only variables are read from `process.env` in backend functions and must not be prefixed with `VITE_`.
 - Without Supabase configured, database features will log warnings but will not prevent the app from running.
@@ -239,8 +270,8 @@ Contributions are welcome. Please follow this process:
 Before submitting, ensure code quality by running:
 
 ```bash
-bun run lint
-bun run format
+npm run lint
+npm run format
 ```
 
 ---
